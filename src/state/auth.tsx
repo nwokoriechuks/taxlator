@@ -1,57 +1,70 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
-import { api, clearToken, extractToken, getToken, setToken } from "../api/client";
+// taxlator/src/state/auth.tsx
+import React, { useMemo, useState } from "react";
+import {
+	api,
+	clearToken,
+	extractToken,
+	getToken,
+	setToken,
+} from "../api/client";
 import { ENDPOINTS } from "../api/endpoints";
-import type { AnyJson, SignInPayload, SignUpPayload } from "../api/types";
-
-type AuthContextValue = {
-  authenticated: boolean;
-  signin: (payload: SignInPayload) => Promise<AnyJson>;
-  signup: (payload: SignUpPayload) => Promise<AnyJson>;
-  sendVerificationCode: (payload: { email: string }) => Promise<AnyJson>;
-  logout: () => void;
-};
-
-const AuthCtx = createContext<AuthContextValue | null>(null);
+import { AuthCtx } from "./auth.context";
+import type { AuthContextValue } from "./auth.context";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authenticated, setAuthenticated] = useState<boolean>(() => Boolean(getToken()));
+	const [authenticated, setAuthenticated] = useState(() => Boolean(getToken()));
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      authenticated,
-      async signin(payload) {
-        const { data } = await api.post(ENDPOINTS.signin, payload);
+	const value = useMemo<AuthContextValue>(
+		() => ({
+			authenticated,
 
-        const token = extractToken(data);
-        if (!token) {
-          throw new Error("Signin succeeded but token not found in response. Update extractToken().");
-        }
+			async signup(payload) {
+				const { data } = await api.post(ENDPOINTS.signup, payload);
+				return data;
+			},
 
-        setToken(token);
-        setAuthenticated(true);
-        return data;
-      },
-      async signup(payload) {
-        const { data } = await api.post(ENDPOINTS.signup, payload);
-        return data;
-      },
-      async sendVerificationCode(payload) {
-        const { data } = await api.post(ENDPOINTS.sendVerificationCode, payload);
-        return data;
-      },
-      logout() {
-        clearToken();
-        setAuthenticated(false);
-      }
-    }),
-    [authenticated]
-  );
+			async verifyEmail(payload) {
+				const { data } = await api.post(ENDPOINTS.verifyEmail, payload);
+				return data;
+			},
 
-  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
-}
+			async sendVerificationCode(payload) {
+				const { data } = await api.post(
+					ENDPOINTS.sendVerificationCode,
+					payload
+				);
+				return data;
+			},
 
-export function useAuth() {
-  const ctx = useContext(AuthCtx);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+			async signin(payload) {
+				const { data } = await api.post(ENDPOINTS.signin, payload);
+
+				const token = extractToken(data);
+				if (!token) {
+					throw new Error("Signin succeeded but no token returned");
+				}
+
+				setToken(token);
+				setAuthenticated(true);
+				return data;
+			},
+
+			async signout() {
+				try {
+					await api.post(ENDPOINTS.signout);
+				} finally {
+					clearToken();
+					setAuthenticated(false);
+				}
+			},
+
+			logout() {
+				clearToken();
+				setAuthenticated(false);
+			},
+		}),
+		[authenticated]
+	);
+
+	return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
