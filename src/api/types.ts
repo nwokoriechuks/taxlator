@@ -31,7 +31,7 @@ export type FreelancerCalculatePayload = {
 	grossIncome: number;
 	frequency?: Frequency;
 	expenses?: number;
-	pension?: boolean;
+	pension?: number;
 };
 
 // CIT request
