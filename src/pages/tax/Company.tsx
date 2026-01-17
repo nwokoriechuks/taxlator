@@ -37,6 +37,14 @@ function toNumberSafe(v: string): number {
 	return Number.isFinite(n) ? n : NaN;
 }
 
+function formatNumberInput(v: string) {
+	// keep digits only
+	const digits = v.replace(/[^\d]/g, "");
+	if (!digits) return "";
+	// add commas
+	return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export default function Company() {
 	const { authenticated } = useAuth();
 
@@ -112,7 +120,6 @@ export default function Company() {
 
 			setResult(data.data);
 
-			// ✅ IMPORTANT: History type is "COMPANY" (not "CIT")
 			addHistory({
 				type: "COMPANY",
 				input: payload as unknown as Record<string, unknown>,
@@ -165,8 +172,11 @@ export default function Company() {
 						errors.revenue ? "border-red-300" : ""
 					}`}
 					value={form.revenue}
-					inputMode="decimal"
-					onChange={(e) => setForm((s) => ({ ...s, revenue: e.target.value }))}
+					inputMode="numeric"
+					onChange={(e) => {
+						const formatted = formatNumberInput(e.target.value);
+						setForm((s) => ({ ...s, revenue: formatted }));
+					}}
 					placeholder="0"
 				/>
 			</div>
@@ -219,6 +229,8 @@ export default function Company() {
 							setForm((s) => ({
 								...s,
 								includeBusinessExpenses: e.target.checked,
+								// optional: clear expenses when turning off
+								...(e.target.checked ? null : { businessExpenses: "" }),
 							}))
 						}
 					/>
@@ -236,11 +248,12 @@ export default function Company() {
 									errors.businessExpenses ? "border-red-300" : ""
 								}`}
 								value={form.businessExpenses}
-								onChange={(e) =>
-									setForm((s) => ({ ...s, businessExpenses: e.target.value }))
-								}
+								onChange={(e) => {
+									const formatted = formatNumberInput(e.target.value);
+									setForm((s) => ({ ...s, businessExpenses: formatted }));
+								}}
 								placeholder="0"
-								inputMode="decimal"
+								inputMode="numeric"
 							/>
 						</div>
 						{errors.businessExpenses ? (

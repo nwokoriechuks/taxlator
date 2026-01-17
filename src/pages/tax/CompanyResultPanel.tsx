@@ -25,6 +25,13 @@ type Props = {
 	prefillEmail?: string;
 };
 
+function companySizeLabel(size?: string) {
+	if (size === "SMALL") return "Small Company";
+	if (size === "MEDIUM") return "Medium Company";
+	if (size === "LARGE") return "Large Company";
+	return "—";
+}
+
 export default function CompanyResultPanel({
 	result,
 	revenue,
@@ -37,9 +44,9 @@ export default function CompanyResultPanel({
 
 	const r = useMemo(() => (result ?? {}) as Record<string, unknown>, [result]);
 
-	// Be defensive: accept multiple possible field names
+	// ✅ CIT backend returns: taxPayable, taxRate, profit, companySize, revenue, expenses
 	const taxDue = toFiniteNumber(
-		r.taxAmount ?? r.totalTax ?? r.totalAnnualTax ?? r.tax ?? 0
+		r.taxPayable ?? r.taxAmount ?? r.totalTax ?? r.totalAnnualTax ?? r.tax ?? 0
 	);
 
 	const profit = toFiniteNumber(
@@ -53,32 +60,48 @@ export default function CompanyResultPanel({
 		r.profitAfterTax ?? r.netProfit ?? Math.max(0, profit - taxDue)
 	);
 
+	const effectiveCompanySize =
+		(typeof r.companySize === "string"
+			? (r.companySize as string)
+			: undefined) || companySize;
+
 	const ratePct = useMemo(() => {
-		// if backend returns rate as 0.2 etc
-		const rate = r.rate ?? r.taxRate ?? r.citRate;
+		const rate = r.taxRate ?? r.rate ?? r.citRate;
 		if (typeof rate === "number" && Number.isFinite(rate)) {
 			return `${Math.round(rate * 100)}%`;
 		}
-		// fallback by companySize (if you want the exact CIT mapping, set it here)
-		if (companySize === "SMALL") return "0%";
-		if (companySize === "MEDIUM") return "20%";
-		if (companySize === "LARGE") return "30%";
+		if (effectiveCompanySize === "SMALL") return "0%";
+		if (effectiveCompanySize === "MEDIUM") return "20%";
+		if (effectiveCompanySize === "LARGE") return "30%";
 		return "—";
-	}, [r, companySize]);
+	}, [r, effectiveCompanySize]);
+
+	const showExpenses = Number.isFinite(expenses) && expenses > 0;
 
 	return (
 		<div className="bg-white rounded-2xl border shadow-soft overflow-hidden">
 			{/* Header */}
 			<div className="p-6 text-center border-b">
 				<div className="text-sm text-slate-600">Company Income Tax Result</div>
-				<div className="mt-2 text-4xl font-extrabold text-brand-800">
+
+				{/* ✅ Reduced font-size (was text-4xl) */}
+				<div className="mt-2 text-3xl md:text-4xl font-extrabold text-brand-800">
 					{formatNaira(taxDue)}
 				</div>
+
 				<div className="text-sm text-slate-600 mt-1">Total Tax Due</div>
+
+				{/* ✅ Company size shown */}
+				<div className="mt-2 text-xs text-slate-600">
+					Company Size:{" "}
+					<span className="font-semibold text-slate-800">
+						{companySizeLabel(effectiveCompanySize)}
+					</span>
+				</div>
 			</div>
 
 			<div className="p-6">
-				{/* Summary cards (matches screenshot layout) */}
+				{/* Summary cards */}
 				<div className="grid grid-cols-2 gap-4">
 					<div className="rounded-2xl bg-slate-50 border p-4">
 						<div className="text-xs text-slate-600">Tax Amount</div>
@@ -92,7 +115,19 @@ export default function CompanyResultPanel({
 					</div>
 				</div>
 
-				{/* Single row line item (matches your screenshot) */}
+				{/* ✅ Show business expenses only when provided */}
+				{showExpenses && (
+					<div className="mt-5 rounded-2xl bg-slate-50 border px-4 py-4 flex items-center justify-between">
+						<div className="text-sm font-semibold text-slate-800">
+							Business Expenses
+						</div>
+						<div className="text-sm font-semibold text-slate-900">
+							-{formatNaira(expenses)}
+						</div>
+					</div>
+				)}
+
+				{/* Rate row */}
 				<div className="mt-5 rounded-2xl bg-slate-50 border px-4 py-4 flex items-center justify-between">
 					<div className="text-sm font-semibold text-slate-800">
 						Company Income Tax rate ({ratePct})
@@ -109,7 +144,7 @@ export default function CompanyResultPanel({
 					Calculate Another Tax
 				</button>
 
-				{/* Optional guest CTA (same behavior as PAYE/PIT panel) */}
+				{/* Guest CTA */}
 				{!isAuthenticated && (
 					<div className="mt-6 rounded-2xl border bg-slate-200/60 p-5">
 						<div className="text-sm font-semibold text-slate-900">

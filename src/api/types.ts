@@ -43,6 +43,20 @@ export type CitCalculatePayload = {
 	frequency?: Frequency;
 };
 
+// VAT request
+export type VatCalculationType = "add" | "remove";
+export type VatTransactionType =
+	| "Domestic sale/Purchase"
+	| "Digital Services"
+	| "Export/International"
+	| "Exempt";
+
+export type VatCalculatePayload = {
+	transactionAmount: number;
+	calculationType: VatCalculationType;
+	transactionType: VatTransactionType;
+};
+
 // Union payload (one of the above)
 export type TaxCalculatePayload =
 	| PayePitCalculatePayload
