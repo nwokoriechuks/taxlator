@@ -106,13 +106,13 @@ export default function Navbar() {
 						</a>
 						<a
 							className="px-3 py-2 rounded text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50"
-							href="/faqs"
+							href="/Privacy_Policy"
 						>
 							Privacy Policy
 						</a>
 						<a
 							className="px-3 py-2 rounded text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50"
-							href="/terms&conditions"
+							href="/Terms_Conditions"
 						>
 							TERMS & CONDITIONS
 						</a>

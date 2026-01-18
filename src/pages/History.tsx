@@ -18,7 +18,8 @@ function typeLabel(t: HistoryItem["type"]) {
 	}
 }
 
-export default function History({ user }: { user: { id: string } | null }) {
+export default function History() {
+	const user = null;
 	const [items, setItems] = useState<HistoryItem[]>([]);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -96,7 +97,7 @@ export default function History({ user }: { user: { id: string } | null }) {
 													</div>
 												</div>
 											</button>
-										) : null
+										) : null,
 									)}
 								</div>
 							)}
