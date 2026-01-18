@@ -4,7 +4,7 @@ import {
 	FaFacebookF,
 	FaInstagram,
 	FaLinkedinIn,
-	FaXTwitter,
+	FaXTwitter, 
 } from "react-icons/fa6";
 import { FaApple, FaAndroid } from "react-icons/fa";
 
@@ -12,7 +12,7 @@ export default function Footer() {
 	return (
 		<footer className="bg-white border-t">
 			<div className="max-w-6xl mx-auto px-4 py-10">
-				<div className="flex flex-row justify-between gap-8">
+				<div className="flex flex-col md:flex-row md:justify-between gap-4">
 					{/* Copyright */}
 					<div className="text-sm text-slate-600">
 						<p>© {new Date().getFullYear()} Taxlator.</p>

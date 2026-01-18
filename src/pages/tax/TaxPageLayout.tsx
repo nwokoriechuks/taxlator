@@ -1,5 +1,6 @@
 // taxlator/src/pages/tax/TaxPageLayout.tsx
 import React from "react";
+import { FaArrowLeft } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
 export default function TaxPageLayout({
@@ -20,7 +21,9 @@ export default function TaxPageLayout({
 					to="/calculate"
 					className="text-sm text-slate-700 hover:text-brand-800"
 				>
-					← Back
+					<div className="bg-blue-900 flex text-[12px] md:text-sm items-center gap-1 w-fit text-white px-2 py-2 rounded-lg">
+					 < FaArrowLeft /> Back
+					</div>
 				</Link>
 
 				<div className="mt-4 grid lg:grid-cols-2 gap-6 items-start">

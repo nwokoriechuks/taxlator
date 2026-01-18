@@ -136,25 +136,25 @@ export default function Vat() {
 				<button
 					type="button"
 					onClick={() => setCalculationType("add")}
-					className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
+					className={`rounded-lg border px-4 py-3 text-[12px] md:text-sm font-semibold ${
 						calculationType === "add"
 							? "bg-brand-800 text-white border-brand-800"
 							: "bg-white text-slate-900"
 					}`}
 				>
-					+Add VAT
+					+ Add VAT
 				</button>
 
 				<button
 					type="button"
 					onClick={() => setCalculationType("remove")}
-					className={`rounded-lg border px-4 py-3 text-sm font-semibold ${
+					className={`rounded-lg border px-4 py-3 text-[12px] md:text-sm font-semibold ${
 						calculationType === "remove"
 							? "bg-brand-800 text-white border-brand-800"
 							: "bg-white text-slate-900"
 					}`}
 				>
-					-Remove VAT
+					- Remove VAT
 				</button>
 			</div>
 

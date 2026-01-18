@@ -20,9 +20,9 @@ function SectionTitle({
 }) {
 	return (
 		<div className="text-center">
-			<div className="text-[1.6rem] font-semibold text-brand-800">{title}</div>
+			<div className="text-xl md:text-[1.6rem] font-semibold text-brand-800">{title}</div>
 			{subtitle ? (
-				<div className="text-lg text-slate-600 mt-1">{subtitle}</div>
+				<div className="text-sm md:text-lg text-slate-600 mt-1">{subtitle}</div>
 			) : null}
 		</div>
 	);
@@ -67,10 +67,10 @@ export default function Landing() {
 				</div>
 
 				{/* CTA */}
-				<div className="mt-6">
+				<div className="mt-2 md-mt-6">
 					<Link
 						to="/calculate"
-						className="block w-full rounded-xl bg-brand-800 py-6 text-center text-lg font-bold text-white hover:bg-brand-900 transition"
+						className="block w-full rounded-xl bg-brand-800 py-2 md:py-6 text-center text-md md:text-lg font-bold text-white hover:bg-brand-900 transition"
 					>
 						CALCULATE TAX
 					</Link>
@@ -78,14 +78,14 @@ export default function Landing() {
 			</div>
 
 			{/* ----------HOW IT WORKS ---------- */}
-			<div className="bg-slate-50 py-16">
+			<div className="bg-slate-50 py-2 md:py-16">
 				<div className="max-w-6xl mx-auto px-4">
 					<SectionTitle
 						title="How It Works?"
 						subtitle="Just three steps to calculate your tax"
 					/>
 
-					<div className="mt-12 grid gap-8 md:grid-cols-3">
+					<div className="mt-5 md:mt-12 grid gap-8 md:grid-cols-3">
 						{[
 							{
 								title: "Choose Your Tax Type",
@@ -105,20 +105,20 @@ export default function Landing() {
 						].map((item, index) => (
 							<div
 								key={item.title}
-								className="rounded-2xl border border-brand-500 bg-white px-6 py-10 text-center"
+								className="rounded-2xl border border-brand-500 bg-white px-3 py-5 md:px-6 md:py-10 text-center"
 							>
 								{/* Number */}
-								<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-800 text-white text-lg font-semibold">
+								<div className="mx-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-full bg-brand-800 text-white text-lg md:text-lg font-semibold">
 									{index + 1}
 								</div>
 
 								{/* Title */}
-								<h3 className="mt-6 text-lg font-semibold text-slate-900">
+								<h3 className="mt-6 text-base md:text-lg font-semibold text-slate-900">
 									{item.title}
 								</h3>
 
 								{/* Description */}
-								<p className="mt-4 text-sm text-slate-600 leading-relaxed">
+								<p className="mt-4 text-[13px] md:text-sm text-slate-600 leading-relaxed">
 									{item.description}
 								</p>
 							</div>
@@ -142,7 +142,7 @@ export default function Landing() {
 								className="rounded-2xl bg-white border border-slate-200 overflow-hidden hover:shadow-md transition"
 							>
 								{/* Image */}
-								<div className="h-56 bg-slate-50 flex items-center justify-center">
+								<div className="h-auto bg-slate-50 flex items-center justify-center">
 									<img
 										src={image}
 										alt={title}
@@ -157,11 +157,11 @@ export default function Landing() {
 										{tag}
 									</span>
 
-									<h3 className="text-lg font-semibold text-slate-900">
+									<h3 className="text-base md:text-lg font-semibold text-slate-900">
 										{title}
 									</h3>
 
-									<p className="mt-3 text-sm text-slate-600 leading-relaxed">
+									<p className="mt-3 text-[10px] md:text-sm text-slate-600 leading-relaxed">
 										{description}
 									</p>
 
@@ -219,11 +219,11 @@ export default function Landing() {
 								className="flex items-center gap-5 rounded-2xl bg-white border border-brand-300 p-6"
 							>
 								{/* Icon – CENTERED */}
-								<div className="flex items-center justify-center w-14 h-14 rounded-xl bg-brand-800">
+								<div className="flex items-center justify-center md:w-14 md:h-7 rounded-xl bg-brand-800">
 									<img
 										src={icon}
 										alt={title}
-										className="w-7 h-7 object-contain"
+										className="object-contain"
 									/>
 								</div>
 
@@ -245,12 +245,12 @@ export default function Landing() {
 			{/* ----------READY TO GET STARTED ---------- */}
 			<div className="bg-slate-50 py-16">
 				<div className="max-w-6xl mx-auto px-4">
-					<div className="rounded-2xl bg-brand-800 px-6 py-14 text-center">
+					<div className="rounded-2xl bg-brand-800 px-6 py-6 md:py-14 text-center">
 						<h2 className="text-2xl md:text-3xl font-semibold text-white">
 							Ready to Get Started?
 						</h2>
 
-						<p className="mt-4 max-w-2xl mx-auto text-sm md:text-base text-white/90 leading-relaxed">
+						<p className="mt-4 max-w-2xl mx-auto text-[12px] md:text-base text-white/90 leading-relaxed">
 							Start calculating your taxes now. No signup required. Save your
 							calculations by creating a free account (optional).
 						</p>
