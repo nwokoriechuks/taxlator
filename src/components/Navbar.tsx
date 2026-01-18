@@ -9,7 +9,7 @@ function NavItem({
 	onClick,
 }: {
 	to: string;
-	children: React.ReactNode;
+	children: React.ReactNode; 
 	onClick?: () => void;
 }) {
 	return (
@@ -171,21 +171,21 @@ export default function Navbar() {
 
 							<a
 								className="block text-sm font-medium px-2 py-2 rounded text-slate-700 hover:text-brand-700 hover:bg-slate-50"
-								href="/#guides"
+								href="/taxguide"
 								onClick={closeMobile}
 							>
 								Tax Guides
 							</a>
 							<a
 								className="block text-sm font-medium px-2 py-2 rounded text-slate-700 hover:text-brand-700 hover:bg-slate-50"
-								href="/#about"
+								href="/about"
 								onClick={closeMobile}
 							>
 								About
 							</a>
 							<a
 								className="block text-sm font-medium px-2 py-2 rounded text-slate-700 hover:text-brand-700 hover:bg-slate-50"
-								href="/#faqs"
+								href="/taxguide"
 								onClick={closeMobile}
 							>
 								FAQs
