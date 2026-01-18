@@ -146,7 +146,7 @@ export default function Landing() {
 									<img
 										src={image}
 										alt={title}
-										className="max-h-full max-w-full object-contain"
+										className="w-full object-cover"
 									/>
 								</div>
 
