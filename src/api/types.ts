@@ -20,7 +20,7 @@ export type CompanySize = "SMALL" | "MEDIUM" | "LARGE";
 export type PayePitCalculatePayload = {
 	taxType: "PAYE/PIT";
 	grossIncome: number;
-	frequency?: Frequency;
+	frequency?: "monthly" | "annual";
 	rentRelief?: number;
 	otherDeductions?: number;
 };
@@ -69,6 +69,15 @@ export type JsonValue =
 	| JsonPrimitive
 	| JsonValue[]
 	| { [key: string]: JsonValue };
+
+// History item type
+export type HistoryItem = {
+	_id?: string; // MongoDB ID
+	type: "PAYE/PIT" | "FREELANCER" | "CIT" | "VAT";
+	input: Record<string, unknown>; // store the payload used
+	result: Record<string, unknown>; // store the calculation result
+	createdAt: string | Date;
+};
 
 // Upstream responses vary; keep flexible but lint-safe
 export type AnyJson = Record<string, unknown>;

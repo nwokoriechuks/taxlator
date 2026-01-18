@@ -22,6 +22,14 @@ function toNumberSafe(v: string): number {
 	return Number.isFinite(n) ? n : NaN;
 }
 
+function formatWithCommas(value: string): string {
+	const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+	if (!cleaned) return "";
+	const parts = cleaned.split(".");
+	parts[0] = Number(parts[0]).toLocaleString("en-NG");
+	return parts.join(".");
+}
+
 export default function Vat() {
 	const { authenticated } = useAuth();
 
@@ -118,7 +126,7 @@ export default function Vat() {
 			<input
 				className="mt-1 w-full rounded border px-3 py-2 text-sm"
 				value={transactionAmount}
-				onChange={(e) => setTransactionAmount(e.target.value)}
+				onChange={(e) => setTransactionAmount(formatWithCommas(e.target.value))}
 				placeholder="200,000"
 				inputMode="decimal"
 			/>

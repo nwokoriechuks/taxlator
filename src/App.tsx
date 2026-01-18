@@ -15,8 +15,8 @@ import Freelancer from "./pages/tax/FreeLancer";
 import Company from "./pages/tax/Company";
 import TaxGuides from "./pages/TaxGuides";
 import About from "./pages/About";
-import Faqs from "./pages/Faqs";
-import Terms from "./pages/Term_Conditions";
+import Faqs from "./pages/Privacy_Policy";
+import Terms from "./pages/Terms_Conditions";
 
 export default function App() {
 	return (

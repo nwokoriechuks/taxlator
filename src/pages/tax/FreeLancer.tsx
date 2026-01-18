@@ -1,5 +1,5 @@
 // taxlator/src/pages/tax/FreeLancer.tsx
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import TaxPageLayout from "./TaxPageLayout";
 import { api } from "../../api/client";
 import { ENDPOINTS } from "../../api/endpoints";
@@ -10,6 +10,20 @@ import FreelancerResultPanel from "./FreelancerResultPanel";
 
 type ApiSuccess<T> = { success: true; data: T; message?: string };
 type ApiFail = { success?: false; message?: string; error?: string };
+
+/* =======================
+   Formatting helpers
+======================= */
+const formatNumber = (value: string) => {
+	if (!value) return "";
+	const numeric = value.replace(/,/g, "");
+	if (isNaN(Number(numeric))) return value;
+	return Number(numeric).toLocaleString();
+};
+
+const parseNumber = (value: string) => {
+	return Number(value.replace(/,/g, "") || 0);
+};
 
 export default function FreeLancer() {
 	const { authenticated } = useAuth();
@@ -23,6 +37,11 @@ export default function FreeLancer() {
 	const [error, setError] = useState("");
 	const [result, setResult] = useState<unknown>(null);
 
+	const grossIncomeNumber = useMemo(
+		() => parseNumber(grossAnnualIncome),
+		[grossAnnualIncome]
+	);
+
 	async function calculate() {
 		setError("");
 		setBusy(true);
@@ -30,11 +49,9 @@ export default function FreeLancer() {
 		try {
 			const payload: FreelancerCalculatePayload = {
 				taxType: "FREELANCER",
-				grossIncome: Number(grossAnnualIncome || 0),
-				// frequency optional; backend defaults to "annual"
-				// frequency: "annual",
-				pension: Number(pensionContrib || 0),
-				expenses: includeExpenses ? Number(businessExpenses || 0) : 0,
+				grossIncome: grossIncomeNumber,
+				pension: parseNumber(pensionContrib),
+				expenses: includeExpenses ? parseNumber(businessExpenses) : 0,
 			};
 
 			const { data } = await api.post<ApiSuccess<unknown> | ApiFail>(
@@ -82,25 +99,25 @@ export default function FreeLancer() {
 				result ? (
 					<FreelancerResultPanel
 						result={result}
-						grossIncome={Number(grossAnnualIncome || 0)}
+						grossIncome={grossIncomeNumber}
 						isAuthenticated={authenticated}
 					/>
 				) : null
 			}
 		>
-			{error ? (
+			{error && (
 				<div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
 					{error}
 				</div>
-			) : null}
+			)}
 
 			<label className="text-xs font-semibold text-slate-700">
 				Gross Annual Income
 			</label>
 			<input
 				className="mt-1 w-full rounded border px-3 py-2 text-sm"
-				value={grossAnnualIncome}
-				onChange={(e) => setGrossAnnualIncome(e.target.value)}
+				value={formatNumber(grossAnnualIncome)}
+				onChange={(e) => setGrossAnnualIncome(e.target.value.replace(/,/g, ""))}
 				placeholder="₦ 0"
 				inputMode="numeric"
 			/>
@@ -110,8 +127,8 @@ export default function FreeLancer() {
 			</label>
 			<input
 				className="mt-1 w-full rounded border px-3 py-2 text-sm"
-				value={pensionContrib}
-				onChange={(e) => setPensionContrib(e.target.value)}
+				value={formatNumber(pensionContrib)}
+				onChange={(e) => setPensionContrib(e.target.value.replace(/,/g, ""))}
 				placeholder="₦ 0"
 				inputMode="numeric"
 			/>
@@ -142,8 +159,10 @@ export default function FreeLancer() {
 						</label>
 						<input
 							className="mt-1 w-full rounded border px-3 py-2 text-sm"
-							value={businessExpenses}
-							onChange={(e) => setBusinessExpenses(e.target.value)}
+							value={formatNumber(businessExpenses)}
+							onChange={(e) =>
+								setBusinessExpenses(e.target.value.replace(/,/g, ""))
+							}
 							placeholder="₦ 0"
 							inputMode="numeric"
 						/>

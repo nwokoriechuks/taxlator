@@ -1,6 +1,45 @@
-// taxlator/src/pages/tax/FreelancerResultPanel.tsx
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+/* =======================
+   Types
+======================= */
+
+type TaxBreakdownItem = {
+	rate?: number;
+	tax?: number;
+	taxableAmount?: number;
+};
+
+type FreelancerResult = {
+	totalAnnualTax?: number;
+	totalTax?: number;
+	taxAmount?: number;
+	annualTax?: number;
+	tax?: number;
+
+	monthlyTax?: number;
+
+	annualGrossIncome?: number;
+	grossIncome?: number;
+
+	taxableIncome?: number;
+	pension?: number;
+	expenses?: number;
+
+	breakdown?: TaxBreakdownItem[];
+};
+
+type Props = {
+	result: unknown;
+	grossIncome: number;
+	isAuthenticated: boolean;
+	prefillEmail?: string;
+};
+
+/* =======================
+   Helpers
+======================= */
 
 function formatNaira(value: unknown) {
 	const n = typeof value === "number" ? value : Number(value);
@@ -10,13 +49,6 @@ function formatNaira(value: unknown) {
 		maximumFractionDigits: 2,
 	})}`;
 }
-
-type Props = {
-	result: unknown;
-	grossIncome: number;
-	isAuthenticated: boolean;
-	prefillEmail?: string;
-};
 
 export default function FreelancerResultPanel({
 	result,
@@ -28,43 +60,42 @@ export default function FreelancerResultPanel({
 	const [open, setOpen] = useState(false);
 	const [email, setEmail] = useState(prefillEmail);
 
-	// Be defensive: backend result shape may vary.
-	const r = useMemo(() => (result ?? {}) as Record<string, unknown>, [result]);
+	/* =======================
+	   Normalize backend result
+	======================= */
 
-	// Your freelancer service returns:
-	// totalAnnualTax, monthlyTax, taxableIncome, annualGrossIncome, pension, expenses, breakdown[]
+	const r: FreelancerResult = useMemo(() => {
+		if (typeof result === "object" && result !== null) {
+			return result as FreelancerResult;
+		}
+		return {};
+	}, [result]);
+
 	const totalAnnualTax =
 		r.totalAnnualTax ?? r.totalTax ?? r.taxAmount ?? r.annualTax ?? r.tax ?? 0;
 
 	const annualGross = r.annualGrossIncome ?? r.grossIncome ?? grossIncome;
-
 	const taxableIncome = r.taxableIncome ?? 0;
-
 	const pension = r.pension ?? 0;
 	const expenses = r.expenses ?? 0;
 
 	const netIncome = useMemo(() => {
-		const tax =
-			typeof totalAnnualTax === "number"
-				? totalAnnualTax
-				: Number(totalAnnualTax);
-		const gross =
-			typeof annualGross === "number" ? annualGross : Number(annualGross);
+		const tax = Number(totalAnnualTax);
+		const gross = Number(annualGross);
 		if (!Number.isFinite(tax) || !Number.isFinite(gross)) return grossIncome;
 		return Math.max(0, gross - tax);
 	}, [totalAnnualTax, annualGross, grossIncome]);
 
-	const breakdown = useMemo(() => {
-		const b = r.breakdown;
-		return Array.isArray(b) ? (b as Array<Record<string, unknown>>) : [];
-	}, [r]);
+	const breakdown: TaxBreakdownItem[] = Array.isArray(r.breakdown)
+		? r.breakdown
+		: [];
 
 	return (
 		<div className="bg-white rounded-2xl border shadow-soft overflow-hidden">
 			{/* Header */}
-			<div className="p-6 text-center border-b">
-				<div className="text-sm text-slate-600">
-					Freelancer / Self-Employed Result
+			<div className="p-8 text-center border-b">
+				<div className="text-xs text-slate-500">
+					Freelancers / Self employed (PIT- Self assessment) Result
 				</div>
 				<div className="mt-2 text-3xl font-extrabold text-brand-800">
 					{formatNaira(totalAnnualTax)}
@@ -73,50 +104,93 @@ export default function FreelancerResultPanel({
 			</div>
 
 			<div className="p-6">
-				{/* Summary cards */}
-				<div className="grid grid-cols-2 gap-4">
-					<div className="rounded-2xl bg-slate-50 border p-4">
-						<div className="text-xs text-slate-600">Gross Income</div>
-						<div className="mt-1 font-semibold">{formatNaira(annualGross)}</div>
+				{/* Gross / Net */}
+				<div className="grid grid-cols-2 gap-4 mt-2">
+					<div className="rounded-xl bg-slate-50 border px-5 py-4">
+						<div className="text-xs text-slate-500">Gross Income</div>
+						<div className="mt-2 text-sm font-semibold text-slate-900">
+							{formatNaira(annualGross)}
+						</div>
 					</div>
-					<div className="rounded-2xl bg-slate-50 border p-4">
-						<div className="text-xs text-slate-600">Net Income</div>
-						<div className="mt-1 font-semibold">{formatNaira(netIncome)}</div>
+
+					<div className="rounded-xl bg-slate-50 border px-5 py-4">
+						<div className="text-xs text-slate-500">Net Income</div>
+						<div className="mt-2 text-sm font-semibold text-slate-900">
+							{formatNaira(netIncome)}
+						</div>
 					</div>
 				</div>
 
-				{/* Accordion trigger */}
+				{/* Accordion */}
 				<button
 					type="button"
 					onClick={() => setOpen((s) => !s)}
-					className="mt-5 w-full flex items-center justify-between rounded-2xl bg-slate-50 border px-4 py-3 text-sm font-semibold"
+					className="mt-6 w-full flex items-center justify-between rounded-xl bg-slate-50 border px-5 py-3 text-sm font-semibold"
 				>
 					<span>View Tax Breakdown</span>
 					<span className="text-slate-500">{open ? "▴" : "▾"}</span>
 				</button>
 
-				{/* Breakdown */}
 				{open && (
-					<div className="mt-4 rounded-2xl border bg-slate-50 p-4">
+					<div className="mt-4 rounded-xl border bg-slate-50 p-5">
 						<div className="text-brand-800 font-semibold">
 							Tax Calculation Breakdown
 						</div>
 
-						<div className="mt-3 space-y-1 text-xs text-slate-700">
-							<div className="flex justify-between gap-3">
-								<div className="truncate">Pension Contributions</div>
-								<div className="font-medium">{formatNaira(pension)}</div>
+						{/* Deductions */}
+						<div className="mt-4 space-y-2 text-xs text-slate-700">
+							<div className="flex justify-between">
+								<span>Business Expenses (100%)</span>
+								<span>-{formatNaira(expenses)}</span>
 							</div>
-							<div className="flex justify-between gap-3">
-								<div className="truncate">Business Expenses</div>
-								<div className="font-medium">{formatNaira(expenses)}</div>
+							<div className="flex justify-between">
+								<span>Pension Deduction</span>
+								<span>-{formatNaira(pension)}</span>
 							</div>
-							<div className="flex justify-between gap-3">
-								<div className="truncate">Annual Taxable Income</div>
-								<div className="font-medium">{formatNaira(taxableIncome)}</div>
+
+							<hr />
+
+							<div className="flex justify-between font-medium">
+								<span>Annual Taxable Income</span>
+								<span>{formatNaira(taxableIncome)}</span>
 							</div>
 						</div>
 
+						{/* Progressive bands */}
+						<hr className="my-4" />
+
+						<div className="text-xs font-semibold text-slate-700">
+							Progressive Tax Band (Annual)
+						</div>
+
+						<div className="mt-2 space-y-1 text-xs text-slate-600">
+							<div className="flex justify-between">
+								<span>₦0 - ₦800,000</span>
+								<span>0%</span>
+							</div>
+							<div className="flex justify-between">
+								<span>₦800,001 - ₦3,000,000</span>
+								<span>15%</span>
+							</div>
+							<div className="flex justify-between">
+								<span>₦3,000,001 - ₦12,000,000</span>
+								<span>18%</span>
+							</div>
+							<div className="flex justify-between">
+								<span>₦12,000,001 - ₦25,000,000</span>
+								<span>21%</span>
+							</div>
+							<div className="flex justify-between">
+								<span>₦25,000,001 - ₦50,000,000</span>
+								<span>23%</span>
+							</div>
+							<div className="flex justify-between">
+								<span>Above ₦50,000,000</span>
+								<span>25%</span>
+							</div>
+						</div>
+
+						{/* Dynamic breakdown */}
 						{breakdown.length > 0 && (
 							<>
 								<hr className="my-4" />
@@ -124,36 +198,24 @@ export default function FreelancerResultPanel({
 									Break Down Your Tax
 								</div>
 
-								<div className="mt-2 space-y-2 text-xs text-slate-700">
+								<div className="mt-2 space-y-2 text-xs">
 									{breakdown.map((b, idx) => {
-										const rate = b.rate ?? "";
-										const taxableAmount = b.taxableAmount ?? 0;
-										const tax = b.tax ?? 0;
-
-										const rateLabel =
-											typeof rate === "number"
-												? `${Math.round(rate * 100)}%`
-												: String(rate);
+										const ratePct =
+											typeof b.rate === "number"
+												? `${Math.round(b.rate * 100)}%`
+												: "—";
 
 										return (
 											<div
 												key={idx}
-												className="rounded-xl bg-white/60 border px-3 py-2"
+												className="flex justify-between rounded bg-white border px-3 py-2"
 											>
-												<div className="flex justify-between gap-3">
-													<div className="truncate">
-														Tax Band {idx + 1} ({rateLabel})
-													</div>
-													<div className="font-semibold">
-														{formatNaira(tax)}
-													</div>
-												</div>
-												<div className="mt-1 flex justify-between gap-3 text-slate-600">
-													<div className="truncate">Taxable Amount</div>
-													<div className="font-medium">
-														{formatNaira(taxableAmount)}
-													</div>
-												</div>
+												<span>
+													Tax Band {idx + 1} ({ratePct})
+												</span>
+												<span className="font-medium">
+													{formatNaira(b.tax ?? 0)}
+												</span>
 											</div>
 										);
 									})}
@@ -164,34 +226,32 @@ export default function FreelancerResultPanel({
 						<hr className="my-4" />
 
 						<div className="flex justify-between text-xs text-slate-700">
-							<div>Total Annual Tax</div>
-							<div className="font-semibold">{formatNaira(totalAnnualTax)}</div>
+							<span>Total Annual Tax</span>
+							<span className="font-semibold">
+								{formatNaira(totalAnnualTax)}
+							</span>
 						</div>
 
 						<div className="flex justify-between text-xs text-slate-700 mt-1">
-							<div>Monthly Tax</div>
-							<div className="font-semibold">
-								{formatNaira(
-									typeof r.monthlyTax === "number"
-										? r.monthlyTax
-										: Number(r.monthlyTax ?? Number(totalAnnualTax) / 12)
-								)}
-							</div>
+							<span>Monthly Tax</span>
+							<span className="font-semibold">
+								{formatNaira(r.monthlyTax ?? Number(totalAnnualTax) / 12)}
+							</span>
 						</div>
 					</div>
 				)}
 
-				{/* Actions */}
+				{/* CTA */}
 				<button
 					onClick={() => navigate("/calculate")}
-					className="mt-6 w-full rounded bg-brand-800 text-white py-2.5 text-sm font-semibold hover:bg-brand-900"
+					className="mt-8 w-full rounded-lg bg-brand-800 text-white py-3 text-sm font-semibold hover:bg-brand-900"
 				>
 					Calculate Another Tax
 				</button>
 
-				{/* Guest-only CTA */}
+				{/* Guest CTA */}
 				{!isAuthenticated && (
-					<div className="mt-6 rounded-2xl border bg-slate-200/60 p-5">
+					<div className="mt-6 rounded-xl border bg-slate-200/60 p-5">
 						<div className="text-sm font-semibold text-slate-900">
 							Save Your Calculations
 						</div>
@@ -201,15 +261,13 @@ export default function FreelancerResultPanel({
 						</div>
 
 						<div className="mt-4 flex gap-3">
-							<div className="flex-1">
-								<input
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									className="w-full rounded border px-3 py-2 text-sm bg-white"
-									placeholder="Enter your email"
-									type="email"
-								/>
-							</div>
+							<input
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								className="flex-1 rounded border px-3 py-2 text-sm bg-white"
+								placeholder="Enter your email"
+								type="email"
+							/>
 							<Link
 								to="/signup"
 								state={{ email }}
